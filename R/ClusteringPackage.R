@@ -190,8 +190,8 @@ get.DB.index <- function(modules,D,g)
 evaluate.boundary <- function(adj,memMatrix,S)
 {
  dj <- adj;
- dj[which(dj != 0)] <- 1;
- bndMatrix <- t(t(memMatrix) %*% dj) * (memMatrix - 1)
+ #dj[which(dj != 0)] <- 1;
+ bndMatrix <- Matrix::t(Matrix::t(memMatrix) %*% dj) * (memMatrix - 1)
  bnd.nodes <- rownames(bndMatrix)[which(apply(bndMatrix,1,function(x) length(which(x < 0))) >= 1)]
  
  new.memMatrix <- memMatrix;
@@ -205,9 +205,9 @@ evaluate.boundary <- function(adj,memMatrix,S)
 
 iterative.boundaryUpdate <- function(g,modules,S,max.iter = 10)
 {
- adj <- igraph::get.adjacency(g,sparse = TRUE,attr = "weight")
- memMatrix <- Matrix::Matrix(do.call(cbind,lapply(modules,function(x,y) {vec <- rep(0,length(y));vec[which(y %in% x)] <- 1;return(vec)},y = igraph::V(g)$name)))
- #memMatrix <- do.call(cbind,lapply(modules,function(x,y) {vec <- rep(0,length(y));vec[which(y %in% x)] <- 1;return(vec)},y = igraph::V(g)$name))
+ adj <- igraph::get.adjacency(g,sparse = TRUE,attr = NULL)
+ memMatrix <- Matrix::Matrix(0,nrow = vcount(g),ncol = length(modules))
+ for (i in 1:length(modules)) memMatrix[match(modules[[i]],V(g)$name),i] <- 1
  rownames(memMatrix) <- igraph::V(g)$name
  
  do.update <- TRUE
@@ -215,7 +215,7 @@ iterative.boundaryUpdate <- function(g,modules,S,max.iter = 10)
  while (do.update & (n.iter < max.iter))
  {
   new.memMatrix <- evaluate.boundary(adj,memMatrix,S)
-  comp.mat <- t(memMatrix) %*% new.memMatrix;
+  comp.mat <- Matrix::t(memMatrix) %*% new.memMatrix;
   diag(comp.mat) <- rep(0,ncol(comp.mat));
   if (all(comp.mat == 0)) do.update = FALSE
   memMatrix <- new.memMatrix;
@@ -418,7 +418,7 @@ get.DegreeHubStatistic <- function(subnetwork,n.perm = 100,doPar = FALSE,n.core 
   split.fact <- factor(split.fact[1:n.perm])
   split.ind <- split(1:n.perm,split.fact)
 
-  k.random <- foreach (ind = split.ind, .combine = 'c', .packages = c("MEGENA")) %dopar%
+  k.random <- foreach (ind = split.ind, .combine = 'c') %dopar%
    {
     k.rand <- c()
     for (n in ind)
@@ -465,7 +465,7 @@ compact.indiv <- function(v,D,alpha)
 {
  if (length(v) > 1)
  {
-  d <- D[v,v]
+  d <- D[match(v,rownames(D)),match(v,colnames(D))]
   SPD.mu <- mean(d[upper.tri(d)],na.rm = T)
   out <- SPD.mu/(log(length(v))^alpha)
  }else{
@@ -510,7 +510,7 @@ pam.split <- function(g,D,k.max = Inf,n.skip = 20)
  if (k.max >= 2)
  {
   S <- get.LPI(g,eta = 0.01,n.order = 3)
-  D.dist <- as.dist(D[igraph::V(g)$name,igraph::V(g)$name]);# make sure D is specific for this network, g.
+  D.dist <- as.dist(D[match(igraph::V(g)$name,rownames(D)),match(igraph::V(g)$name,colnames(D))]);# make sure D is specific for this network, g.
     
   k <- 2;
   n.sk <- 0;
@@ -964,7 +964,7 @@ output.figures = FALSE)
 		cat("Calculating hub significance.....\n")
 		subnet.lst <- lapply(module.output$modules,function(x,g) induced.subgraph(g,x),g = network)
 		
-		if (doPar & (getDoParWorkers() == 1)) set.parallel.backend(n.core)
+		#if (doPar & (getDoParWorkers() == 1)) set.parallel.backend(n.core)
 		module.degreeStat <- vector("list",length(subnet.lst));names(module.degreeStat) <- names(subnet.lst)
 		for (i in 1:length(subnet.lst))
 		{

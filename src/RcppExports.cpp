@@ -9,16 +9,12 @@ using namespace Rcpp;
 SEXP planaritytest(SEXP N, SEXP rows, SEXP cols);
 RcppExport SEXP MEGENA_planaritytest(SEXP NSEXP, SEXP rowsSEXP, SEXP colsSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type N(NSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type rows(rowsSEXP );
-        Rcpp::traits::input_parameter< SEXP >::type cols(colsSEXP );
-        SEXP __result = planaritytest(N, rows, cols);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< SEXP >::type N(NSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type rows(rowsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type cols(colsSEXP);
+    __result = Rcpp::wrap(planaritytest(N, rows, cols));
+    return __result;
 END_RCPP
 }

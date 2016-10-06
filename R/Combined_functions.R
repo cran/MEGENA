@@ -8,9 +8,12 @@ save.output = FALSE)
 	# mod.pval = module p-value
 	# hub.pval = hub p-value
 	
-	if (doPar)
+	if (doPar & getDoParWorkers() == 1 & num.cores > 1)
 	{
-		set.parallel.backend(num.cores)
+		cl <- makeCluster(n.cores)
+		registerDoParallel(cl)
+		# check how many workers are there
+		cat(paste("number of cores to use:",getDoParWorkers(),"\n",sep = ""))
 	}
 	
 	###### do clustering

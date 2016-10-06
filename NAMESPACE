@@ -1,5 +1,6 @@
 useDynLib(MEGENA)
 exportPattern(calculate.correlation,
+				compute.PFN.par,
 				calculate.PFN,
 				datExpr,
 				do.MEGENA,
@@ -8,6 +9,8 @@ exportPattern(calculate.correlation,
 				load.data,
 				MEGENA.ModuleSummary,
 				output.geneSet.file,
+				plot_module,
+				plot_subgraph,
 				planaritytest,
 				read.geneSet,
 				set.parallel.backend)
@@ -22,6 +25,8 @@ importFrom(Matrix,which)
 importFrom("grDevices", "dev.off", "heat.colors", "png")
 importFrom("graphics", "abline", "barplot", "hist", "par", "plot")
 importFrom("stats", "as.dist", "cor", "cor.test", "dist", "heatmap","p.adjust", "pchisq", "pnorm", "sd", "var")
+importFrom("stats", "quantile")
+importFrom("parallel","makeCluster")
 importFrom("utils", "combn", "read.delim", "write.table")
 import(doParallel)
 import(igraph)
@@ -30,3 +35,4 @@ import(fpc)
 import(foreach)
 import(ggplot2)
 import(reshape)
+import(ggrepel)

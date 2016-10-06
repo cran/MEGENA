@@ -5,30 +5,32 @@
 
 # set parallel backend
 anyNA <- function(x) any(is.na(x))
-set.parallel.backend <- function(num.cores = NULL)
-{
- 
- max.cores <- as.integer(Sys.getenv('NUMBER_OF_PROCESSORS'))
 
- if (is.na(max.cores)) max.cores <- num.cores
-
- if (is.null(num.cores))
- {
-  num.cores <- max.cores;
- }else{
-  if (num.cores > max.cores)
-  {
-   cat("warning: num.cores exceeds maximum available in the system.")
-   num.cores <- max.cores
-  }
- }
+###### deprecate set.parallel.backend() function in MEGENA__1.3.4-6 version. 
+#set.parallel.backend <- function(num.cores = NULL)
+#{
  
- cl <- parallel::makeCluster(num.cores)
+# max.cores <- as.integer(Sys.getenv('NUMBER_OF_PROCESSORS'))
 
- registerDoParallel(cl)
+# if (is.na(max.cores)) max.cores <- num.cores
+
+# if (is.null(num.cores))
+# {
+#  num.cores <- max.cores;
+# }else{
+#  if (num.cores > max.cores)
+  # {
+   # cat("warning: num.cores exceeds maximum available in the system.")
+   # num.cores <- max.cores
+  # }
+ # }
  
- return(0)
-}
+ # cl <- parallel::makeCluster(num.cores)
+
+ # registerDoParallel(cl)
+ 
+ # return(cl)
+# }
 
 
 serial.PFN <- function(sortedEdge,Ng,maxENum)
@@ -120,7 +122,12 @@ iplanarityTesting <- function(epair,rows,cols,N)
   do.par <- FALSE;
   enum_qual <- Ng;
 
-  if (is.null(max.skipEdges)) skip.turns <- ceiling((Ng * 10)/(Njob * Ncore))
+  if (is.null(max.skipEdges)) 
+  {
+	skip.turns <- ceiling((Ng * 10)/(Njob * Ncore))
+  }else{
+	skip.turns <- ceiling(max.skipEdges/(Njob * Ncore))
+  }
   
   zero.hit <- 0;
 
@@ -223,32 +230,30 @@ iplanarityTesting <- function(epair,rows,cols,N)
   return(edgel);
 }
 
-calculate.PFN <- function(edgelist,doPar = FALSE,num.cores = NULL)
+calculate.PFN <- function (edgelist, max.skipEdges = NULL,doPar = FALSE, num.cores = NULL)
 {
- # if doPar = TRUE, threads must be spawned a priori.
-
- if (is.unsorted(rev(edgelist[[3]]))) edgelist <- edgelist[order(edgelist[[3]],decreasing = T),]
- # convert edgelist into integer matrix
- vertex.names <- unique(c(as.character(unique(edgelist[[1]])),as.character(unique(edgelist[[2]]))))
- ijw <- cbind(match(edgelist[[1]],vertex.names),match(edgelist[[2]],vertex.names),edgelist[[3]])
- rm(edgelist)
-
- # check the number of cores is properly set.
-# if (doPar) set.parallel.backend(num.cores)
-  
- ####### Calculate PFN
-
- N <- length(vertex.names)
-
- cat("####### PFN Calculation commences ########\n")
- if (!doPar)
- {
-  PFN <- serial.PFN(sortedEdge = ijw,Ng = N,maxENum = 3*(N-2))
- }else{
-  PFN <- compute.PFN.par(sortedEdge = ijw,Ng = N,maxENum = 3*(N-2),Njob = 1000,Ncore = num.cores,max.skipEdges = NULL,keep.track = TRUE)
- }
-
- PFN <- data.frame(row = vertex.names[PFN[,1]],col = vertex.names[PFN[,2]],weight = PFN[,3])
-
- return(PFN)
+	if (is.null(num.cores)) num.cores = 1
+    if (is.unsorted(rev(edgelist[[3]]))) edgelist <- edgelist[order(edgelist[[3]], decreasing = T),]
+	if (is.null(max.skipEdges)) max.skipEdges = ceiling((num.cores * 1000) * 0.9999)
+	
+    vertex.names <- unique(c(as.character(unique(edgelist[[1]])),
+        as.character(unique(edgelist[[2]]))))
+    ijw <- cbind(match(edgelist[[1]], vertex.names), match(edgelist[[2]],
+        vertex.names), edgelist[[3]])
+    rm(edgelist)
+    N <- length(vertex.names)
+    cat("####### PFN Calculation commences ########\n")
+    if (!doPar) {
+        PFN <- serial.PFN(sortedEdge = ijw, Ng = N, maxENum = 3 *
+            (N - 2))
+    }
+    else {
+        PFN <- compute.PFN.par(sortedEdge = ijw, Ng = N, maxENum = 3 * (N - 2), 
+		Njob = 1000, Ncore = num.cores, max.skipEdges = max.skipEdges,
+            keep.track = TRUE)
+    }
+    PFN <- data.frame(row = vertex.names[PFN[,1]], col = vertex.names[PFN[,2]], weight = PFN[, 3])
+    return(PFN)
 }
+
+

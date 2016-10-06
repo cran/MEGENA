@@ -45,16 +45,16 @@ combine.table <- function(abl,bbl)
  abl.align <- do.call(cbind,lapply(abl[2:ncol(abl)],function(x,y,z) {
                                    names(x) <- z;
                                    vec <- rep(NA,length(y));names(vec) <- y;
-								   if (is.numeric(x)) {vec[names(x)] <- x;}else{
-								   vec[names(x)] <- as.character(x);}
+								   if (is.numeric(x)) {vec[match(names(x),names(vec))] <- x;}else{
+								   vec[match(names(x),names(vec))] <- as.character(x);}
 								   
 								   return(vec)
                           },y = common.id,z = as.character(abl[[1]])))
  bbl.align <- do.call(cbind,lapply(bbl[2:ncol(bbl)],function(x,y,z) {
                                    names(x) <- z;
                                    vec <- rep(NA,length(y));names(vec) <- y;
-								   if (is.numeric(x)) {vec[names(x)] <- x;}else{
-								   vec[names(x)] <- as.character(x);}
+								   if (is.numeric(x)) {vec[match(names(x),names(vec))] <- x;}else{
+								   vec[match(names(x),names(vec))] <- as.character(x);}
 								   
 								   return(vec)
                           },y = common.id,z = as.character(bbl[[1]])))
