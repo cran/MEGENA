@@ -11,7 +11,7 @@ multiscale clustering analysis (MCA) and multiscale hub analysis (MHA) pipeline
 do.MEGENA(g,
 mod.pval = 0.05,hub.pval = 0.05,remove.unsig = TRUE,
 min.size = 10,max.size = 2500,
-doPar = FALSE,num.cores = 4,n.perm = 100,
+doPar = FALSE,num.cores = 4,n.perm = 100,singleton.size = 3,
 save.output = FALSE)
 }
 
@@ -25,6 +25,7 @@ save.output = FALSE)
   \item{doPar}{TRUE/FALSE indicating parallelization usage}
 \item{num.cores}{number of cores to use in parallelization.}
 \item{n.perm}{number of permutations to calculate hub significance p-values/cluster significance p-values.}
+\item{singleton.size}{Minimum module size to regard as non-singleton module. Default is 3.}
 \item{save.output}{TRUE/FALSE to save outputs from each step of analysis}
 }
 \details{

@@ -1,8 +1,8 @@
 ---
 title: "MEGENA_pipeline"
 author: "Won-Min Song"
-date: "October 5, 2016"
-output: html_document
+date: "October 25, 2016"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{MEGENA pipeline overview}
   %\VignetteEngine{knitr::rmarkdown}
@@ -13,9 +13,9 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## MEGENA pipeline as of 10/05/2016 
+## MEGENA pipeline as of 10/25/2016 
 
-This is a routine MEGENA pipeline description encompassing from data correlation analysis to module plotting, and is based on version 1.3.4-6 <https://CRAN.R-project.org/package=MEGENA>.Please cite the paper below when MEGENA is applied as part of your analysis: 
+This is a routine MEGENA pipeline description encompassing from data correlation analysis to module plotting, and is based on version 1.3.5-2 <https://CRAN.R-project.org/package=MEGENA>.Please cite the paper below when MEGENA is applied as part of your analysis: 
 
 Song W.-M., Zhang B. (2015) Multiscale Embedded Gene Co-expression Network Analysis. PLoS Comput Biol 11(11): e1004574. doi: 10.1371/journal.pcbi.1004574.
 
@@ -31,8 +31,8 @@ rm(list = ls()) # rm R working space
 library(MEGENA)
 
 # input parameters
-n.cores <- 1; # number of cores/threads to call for PCP
-doPar <- FALSE; # do we want to parallelize?
+n.cores <- 2; # number of cores/threads to call for PCP
+doPar <-TRUE; # do we want to parallelize?
 method = "pearson" # method for correlation. either pearson or spearman. 
 FDR.cutoff = 0.05 # FDR threshold to define significant correlations upon shuffling samples. 
 module.pval = 0.05 # module significance p-value. Recommended is 0.05. 
@@ -48,23 +48,24 @@ symbol.col= 2
 
 data(Sample_Expression) # load toy example data
 
-ijw <- calculate.correlation(datExpr,doPerm = cor.perm)
+ijw <- calculate.correlation(datExpr,doPerm = cor.perm,output.corTable = FALSE,output.permFDR = FALSE)
 ```
 
 # calculate PFN
 In this step, Planar Filtered Network (PFN) is calculated by taking significant correlation pairs, ijw. In the case of utilizing a different similarity measure, one can independently format the results into 3-column data frame with column names c("row","col","weight"), and make sure the weight column ranges within 0 to 1. Using this as an input to calculate.PFN() will work just as fine. 
 
 ```{r PFN}
-#### register multiple cores if needed.
+#### register multiple cores if needed: note that set.parallel.backend() is deprecated. 
 if (doPar & getDoParWorkers() == 1)
 {
-  set.parallel.backend(num.cores = n.cores)
+  cl <- parallel::makeCluster(n.cores)
+  registerDoParallel(cl)
   # check how many workers are there
   cat(paste("number of cores to use:",getDoParWorkers(),"\n",sep = ""))
 }
 
 ##### calculate PFN
-el <- calculate.PFN(ijw[,1:3],doPar = doPar,num.cores = n.cores)
+el <- calculate.PFN(ijw[,1:3],doPar = doPar,num.cores = n.cores,keep.track = FALSE)
 g <- graph.data.frame(el,directed = FALSE)
 ```
 
@@ -78,7 +79,7 @@ MEGENA.output <- do.MEGENA(g,
  mod.pval = module.pval,hub.pval = hub.pval,remove.unsig = TRUE,
  min.size = 10,max.size = vcount(g)/2,
  doPar = doPar,num.cores = n.cores,n.perm = hub.perm,
- save.output = TRUE)
+ save.output = FALSE)
 
 ###### unregister cores as these are not needed anymore.
 if (getDoParWorkers() > 1)
@@ -115,7 +116,7 @@ print(summary.output$module.table)
 You can generate refined module network plots: 
 
 ```{r modulePlot}
-pnet.obj <- plot_module(output = summary.output,PFN = g,subset.module = "comp1_3",
+pnet.obj <- plot_module(output = summary.output,PFN = g,subset.module = "c1_3",
 	layout = "kamada.kawai",label.hubs.only = FALSE,
 	gene.set = NULL,color.code =  "grey",
 	output.plot = FALSE,out.dir = "modulePlot",col.names = c("magenta","green","cyan"),label.scaleFactor = 2,
@@ -125,3 +126,14 @@ pnet.obj <- plot_module(output = summary.output,PFN = g,subset.module = "comp1_3
 print(pnet.obj[[1]])
 ```
 
+# plot module hierarchy
+
+```{r module hierarchy}
+module.table <- summary.output$module.table
+colnames(module.table)[1] <- "id" # first column of module table must be labelled as "id".
+
+hierarchy.obj <- plot_module_hierarchy(module.table = module.table,label.scaleFactor = 0.15,
+                                    arrow.size = 0.03,node.label.color = "blue")
+#X11();
+print(hierarchy.obj[[1]])
+```

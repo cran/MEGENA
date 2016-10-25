@@ -112,15 +112,27 @@ node.summary <- function (PFN, module.output, hub.output, module.pval = 0.05,hub
             "(min.alpha=", group.summary[[2]][i], ")", sep = "")
         max.id <- paste(as.character(group.summary[[1]])[i],
             "(max.alpha=", group.summary[[3]][i], ")", sep = "")
-        min.module <- get.union.cut(module.output = module.output,
-            alpha.cut = group.summary[[2]][i], module.pval = module.pval,
-            output.plot = F)
+		if (!is.infinite(group.summary[[2]][i]))
+		{
+			min.module <- get.union.cut(module.output = module.output,
+				alpha.cut = group.summary[[2]][i], module.pval = module.pval,
+				output.plot = F)
+		}else{
+			min.module <- module.output$modules[which(is.infinite(module.output$module.alpha))]
+		}
         min.part <- rep(NA, vcount(PFN))
         for (j in 1:length(min.module)) min.part[which(V(PFN)$name %in%
             min.module[[j]])] <- names(min.module)[j]
-        max.module <- get.union.cut(module.output = module.output,
-            alpha.cut = group.summary[[3]][i], module.pval = module.pval,
-            output.plot = F)
+        
+		if (!is.infinite(group.summary[[3]][i]))
+		{
+			max.module <- get.union.cut(module.output = module.output,
+				alpha.cut = group.summary[[3]][i], module.pval = module.pval,
+				output.plot = F)
+		}else{
+			max.module <- module.output$modules[which(is.infinite(module.output$module.alpha))]
+		}
+		
         max.part <- rep(NA, vcount(PFN))
         for (j in 1:length(max.module)) max.part[which(V(PFN)$name %in%
             max.module[[j]])] <- names(max.module)[j]

@@ -12,8 +12,8 @@ exportPattern(calculate.correlation,
 				plot_module,
 				plot_subgraph,
 				planaritytest,
-				read.geneSet,
-				set.parallel.backend)
+				get.DegreeHubStatistic,
+				read.geneSet)
 importFrom(Rcpp, evalCpp)
 #export(evaluate.boundary)
 #export(iterative.boundaryUpdate)

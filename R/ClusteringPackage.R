@@ -713,7 +713,7 @@ d.func = function(x) {1-x},alpha.range = seq(0.01,10,0.01))
 	for (i in 1:length(output.mod))
 	{
 	 new.mod <- output.mod[[i]]$modules
-	 names(new.mod) <- paste("comp",i,"_",1:length(new.mod),sep = "")
+	 names(new.mod) <- paste("c",i,"_",1:length(new.mod),sep = "")
 	 modules <- c(modules,new.mod)
 	 
 	 mod.rel <- output.mod[[i]]$module.relation;
@@ -841,7 +841,7 @@ get.DegreeProfiles <- function(module.output,network,module.pval = 0.05,remove.u
 
 ### cluster similar scales
 
-cluster.scales <- function(connect.matrix,K.max = NULL)
+cluster.scales <- function(connect.matrix,K.max = NULL,save.output = FALSE)
 {
     #if (is.null(K.max)) K.max = ncol(connect.matrix)-1;
 	
@@ -870,32 +870,50 @@ cluster.scales <- function(connect.matrix,K.max = NULL)
 		stat.extract <- c("avg.silwidth","pearsongamma","dunn","sindex")
 		#stat.extract <- c("avg.silwidth","pearsongamma","dunn")
 		stat.out <- do.call(rbind,lapply(stat.out,function(x,y) unlist(x[y]),y = stat.extract))
-
-		majority.vote <- rowMeans(apply(stat.out,2,function(x) {
+		stat.out <- rbind(stat.out)
+		
+		if (nrow(stat.out) > 1)
+		{
+			majority.vote <- rowMeans(apply(stat.out,2,function(x) {
 														   #out <- log(x/max(x,na.rm = T))
 														   out <- log(rank(x)/length(x))
 														   #out <- rank(x)/length(x)
 														   return(out)
 														  }))
-		names(majority.vote) <- 2:K.max
+			names(majority.vote) <- 2:K.max
 		
-		#X11();
-		png("majority_vote.png",width = 600,height = 600)
-		barplot(majority.vote,xlab = "k",ylab = "mean(log(normalized rank))")
-		dev.off()
-		
-		#X11();
-		png("cluster_stats.png",width = 900,height = 900)
-		par(mfrow = c(2,2),mar = c(3,5,1,1))
-		for (c in 1:ncol(stat.out))
-		{
-		 if (!all(is.nan(stat.out[,c]) | is.infinite(stat.out[,c]) | is.na(stat.out[,c]))) plot(2:K.max,stat.out[,c],xlab = "k",ylab = colnames(stat.out)[c])
+			#X11();
+			if (save.output)
+			{
+				png("majority_vote.png",width = 600,height = 600)
+				barplot(majority.vote,xlab = "k",ylab = "mean(log(normalized rank))")
+				dev.off()
+			}
+			#X11();
+			if (save.output)
+			{
+				png("cluster_stats.png",width = 900,height = 900)
+				par(mfrow = c(2,2),mar = c(3,5,1,1))
+				for (c in 1:ncol(stat.out))
+				{
+				 if (!all(is.nan(stat.out[,c]) | is.infinite(stat.out[,c]) | is.na(stat.out[,c]))) plot(2:K.max,stat.out[,c],xlab = "k",ylab = colnames(stat.out)[c])
+				}
+				dev.off()
+			}
+			optimal.i <- max(which(majority.vote == max(majority.vote,na.rm = T)))
+			optimal.cls <- k.cls[[optimal.i]]
+			
+			if (save.output)
+			{
+				png("scalecluster_heatmap.png",width = 700,height = 700)
+				heatmap(as.matrix(D),Colv = "Rowv",scale = "none",col = heat.colors(50),ColSideColors = as.character(optimal.cls))
+				dev.off()
+			}
+		}else{
+			majority.vote <- 0
+			optimal.cls <- k.cls[[1]]
 		}
-		dev.off()
-		
-		optimal.i <- max(which(majority.vote == max(majority.vote,na.rm = T)))
-		optimal.cls <- k.cls[[optimal.i]]
-		
+				
 		## correct for non-continuous alpha values
 		optimal.cls <- optimal.cls[order(as.numeric(names(optimal.cls)))];
 		unique.cls <- unique(optimal.cls);
@@ -941,9 +959,6 @@ cluster.scales <- function(connect.matrix,K.max = NULL)
 		#}
 		
 		#X11();
-		png("scalecluster_heatmap.png",width = 700,height = 700)
-		heatmap(as.matrix(D),Colv = "Rowv",scale = "none",col = heat.colors(50),ColSideColors = as.character(optimal.cls))
-		dev.off()
 		
 		output <- list(clusters = optimal.cls,cluster.across.K = k.cls,quality.score = stat.out,summary.score = majority.vote)
 	}
@@ -973,7 +988,7 @@ output.figures = FALSE)
 	}
 	
 	##### calculate loglikelihood of hubs
-	if (is.null(alpha.range)) alpha.range <- sort(unique(setdiff(module.output$module.alpha,Inf)))
+	if (is.null(alpha.range)) alpha.range <- sort(unique(module.output$module.alpha))
 	
 
 	all.genes <- Reduce("union",module.output$modules)
@@ -981,11 +996,17 @@ output.figures = FALSE)
 	rownames(loglik.matrix) <- all.genes;colnames(loglik.matrix) <- alpha.range;
 	for (i in 1:length(alpha.range))
 	{
-	 cut.output <- get.union.cut(module.output,alpha.cut = alpha.range[i],output.plot = F,plotfname = "validModules_alpha",module.pval = pval,remove.unsig = remove.unsig)
+	 if (!is.infinite(alpha.range[i]))
+	 {
+	  cut.output <- get.union.cut(module.output,alpha.cut = alpha.range[i],output.plot = F,plotfname = "validModules_alpha",module.pval = pval,remove.unsig = remove.unsig)
+	 }else{
+	  cut.output <- module.output$modules[which(is.infinite(module.output$module.alpha))]
+	 }
 	 sigModule.stat <- module.degreeStat[names(cut.output)]
 	 gene.pvalue <- lapply(sigModule.stat,function(x) {vec <- -log(x$pvalue);names(vec) <- as.character(x[[1]]);return(vec)});names(gene.pvalue) <- NULL
 	 gene.pvalue <- do.call(c,gene.pvalue);
-	 loglik.matrix[,i] <- gene.pvalue[all.genes]
+	 gene.pvalue <- gene.pvalue[intersect(names(gene.pvalue),all.genes)]
+	 loglik.matrix[match(names(gene.pvalue),all.genes),i] <- gene.pvalue
 	}
 	loglik.matrix[is.na(loglik.matrix)] <- 0;
 	loglik.matrix[is.infinite(loglik.matrix)] <- max(setdiff(loglik.matrix,Inf),na.rm = T);
@@ -994,7 +1015,7 @@ output.figures = FALSE)
 	cat("Identifying similar scales....\n- ")
 	#connect.matrix <- get.DegreeProfiles(module.output,network,module.pval = pval,remove.unsig = remove.unsig,alpha.range = alpha.range)
 	connect.matrix <- get.DegreeProfiles(module.output,network,module.pval = pval,remove.unsig = FALSE,alpha.range = alpha.range)
-	scale.clusters <- cluster.scales(connect.matrix,K.max = NULL)
+	scale.clusters <- cluster.scales(connect.matrix,K.max = NULL,save.output = output.figures)
 	output <- NULL
 	if (!is.null(scale.clusters))
 	{
@@ -1027,6 +1048,7 @@ output.figures = FALSE)
 		#n.perm = 100
 		for (i in 1:length(split.loglik))
 		{
+		 
 		 loglik.m <- split.loglik[[i]]
 		 real.stat <- 2 * rowSums(loglik.m,na.rm = T)
 		 rand.stat <- c()
@@ -1036,6 +1058,7 @@ output.figures = FALSE)
 		  #rand.matrix <- cbind(apply(loglik.m,2,function(x) sample(x,length(x))))
 		  rand.stat <- c(rand.stat,2 * rowSums(rand.matrix,na.rm = T))
 		 }
+		 
 		 h.out <- hist(rand.stat,breaks = seq(0,max(c(max(rand.stat,na.rm = T),max(real.stat,na.rm = T))) * 1.1,0.01),plot = F)
 		 prop <- h.out$counts/sum(h.out$counts)
 		 inv.prop <- 1-cumsum(prop)

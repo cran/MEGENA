@@ -8,7 +8,8 @@ PFN calculation
 main function to calculate PFN a ranked list of edge pairs
 }
 \usage{
-calculate.PFN(edgelist,max.skipEdges = NULL,doPar = FALSE,num.cores = NULL)
+calculate.PFN(edgelist,max.skipEdges = NULL,doPar = FALSE,
+num.cores = NULL,keep.track = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +19,8 @@ calculate.PFN(edgelist,max.skipEdges = NULL,doPar = FALSE,num.cores = NULL)
   It acts as a threhold to quicken PFN construction termination during PCP.}
   \item{doPar}{TRUE/FALSE logical variable to choose parallelization.}
   \item{num.cores}{number of cores to use in parallelization.}
+  \item{keep.track}{If TRUE, pfg_el.RData will be created in working folder. This file can be used later for restart in case PFN construction did not finish successfully.
+  Default is TRUE.}
 }
 \details{
 If \code{doPar = TRUE}, then num.cores are registered for PCP. 

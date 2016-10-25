@@ -7,8 +7,8 @@ rm(list = ls()) # rm R working space
 library(MEGENA)
 
 # input parameters
-n.cores <- 1; # number of cores/threads to call for PCP
-doPar <- FALSE; # do we want to parallelize?
+n.cores <- 2; # number of cores/threads to call for PCP
+doPar <-TRUE; # do we want to parallelize?
 method = "pearson" # method for correlation. either pearson or spearman. 
 FDR.cutoff = 0.05 # FDR threshold to define significant correlations upon shuffling samples. 
 module.pval = 0.05 # module significance p-value. Recommended is 0.05. 
@@ -24,19 +24,20 @@ symbol.col= 2
 
 data(Sample_Expression) # load toy example data
 
-ijw <- calculate.correlation(datExpr,doPerm = cor.perm)
+ijw <- calculate.correlation(datExpr,doPerm = cor.perm,output.corTable = FALSE,output.permFDR = FALSE)
 
 ## ----PFN-----------------------------------------------------------------
-#### register multiple cores if needed.
+#### register multiple cores if needed: note that set.parallel.backend() is deprecated. 
 if (doPar & getDoParWorkers() == 1)
 {
-  set.parallel.backend(num.cores = n.cores)
+  cl <- parallel::makeCluster(n.cores)
+  registerDoParallel(cl)
   # check how many workers are there
   cat(paste("number of cores to use:",getDoParWorkers(),"\n",sep = ""))
 }
 
 ##### calculate PFN
-el <- calculate.PFN(ijw[,1:3],doPar = doPar,num.cores = n.cores)
+el <- calculate.PFN(ijw[,1:3],doPar = doPar,num.cores = n.cores,keep.track = FALSE)
 g <- graph.data.frame(el,directed = FALSE)
 
 ## ----MCA,results="hide",warning=FALSE------------------------------------
@@ -46,7 +47,7 @@ MEGENA.output <- do.MEGENA(g,
  mod.pval = module.pval,hub.pval = hub.pval,remove.unsig = TRUE,
  min.size = 10,max.size = vcount(g)/2,
  doPar = doPar,num.cores = n.cores,n.perm = hub.perm,
- save.output = TRUE)
+ save.output = FALSE)
 
 ###### unregister cores as these are not needed anymore.
 if (getDoParWorkers() > 1)
@@ -76,7 +77,7 @@ print(head(summary.output$modules,2))
 print(summary.output$module.table)
 
 ## ----modulePlot----------------------------------------------------------
-pnet.obj <- plot_module(output = summary.output,PFN = g,subset.module = "comp1_3",
+pnet.obj <- plot_module(output = summary.output,PFN = g,subset.module = "c1_3",
 	layout = "kamada.kawai",label.hubs.only = FALSE,
 	gene.set = NULL,color.code =  "grey",
 	output.plot = FALSE,out.dir = "modulePlot",col.names = c("magenta","green","cyan"),label.scaleFactor = 2,
@@ -84,4 +85,13 @@ pnet.obj <- plot_module(output = summary.output,PFN = g,subset.module = "comp1_3
 
 #X11();
 print(pnet.obj[[1]])
+
+## ----module hierarchy----------------------------------------------------
+module.table <- summary.output$module.table
+colnames(module.table)[1] <- "id" # first column of module table must be labelled as "id".
+
+hierarchy.obj <- plot_module_hierarchy(module.table = module.table,label.scaleFactor = 0.15,
+                                    arrow.size = 0.03,node.label.color = "blue")
+#X11();
+print(hierarchy.obj[[1]])
 

@@ -80,14 +80,14 @@ layout = "kamada.kawai",output.plot = TRUE,out.dir = "modulePlot")
 		## create co-ordinates 
 		#if (is.null(plot.coord))
 		#{
-		 if (layout == "kamada.kawai")
-		 {
-		  plot.coord = layout.kamada.kawai(sub.PFN)
-		 }
-		 if (layout == "fruchterman.reingold")
-		 {
-		  plot.coord = layout.fruchterman.reingold(sub.PFN)
-		 }
+		if (layout == "kamada.kawai")
+		{
+		  plot.coord = igraph::layout_with_kk(graph = sub.PFN,kkconst = vcount(sub.PFN),maxiter = 50 * vcount(sub.PFN))
+		}
+		if (layout == "fruchterman.reingold")
+		{
+		  plot.coord = igraph::layout.fruchterman.reingold(sub.PFN)
+		}
 		
 		colnames(plot.coord) = c("X1","X2");
 		
