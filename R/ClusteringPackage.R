@@ -874,41 +874,48 @@ cluster.scales <- function(connect.matrix,K.max = NULL,save.output = FALSE)
 		
 		if (nrow(stat.out) > 1)
 		{
-			majority.vote <- rowMeans(apply(stat.out,2,function(x) {
-														   #out <- log(x/max(x,na.rm = T))
-														   out <- log(rank(x)/length(x))
-														   #out <- rank(x)/length(x)
-														   return(out)
-														  }))
-			names(majority.vote) <- 2:K.max
-		
-			#X11();
-			if (save.output)
+			if (K.max > 2)
 			{
-				png("majority_vote.png",width = 600,height = 600)
-				barplot(majority.vote,xlab = "k",ylab = "mean(log(normalized rank))")
-				dev.off()
-			}
-			#X11();
-			if (save.output)
-			{
-				png("cluster_stats.png",width = 900,height = 900)
-				par(mfrow = c(2,2),mar = c(3,5,1,1))
-				for (c in 1:ncol(stat.out))
-				{
-				 if (!all(is.nan(stat.out[,c]) | is.infinite(stat.out[,c]) | is.na(stat.out[,c]))) plot(2:K.max,stat.out[,c],xlab = "k",ylab = colnames(stat.out)[c])
-				}
-				dev.off()
-			}
-			optimal.i <- max(which(majority.vote == max(majority.vote,na.rm = T)))
-			optimal.cls <- k.cls[[optimal.i]]
+				majority.vote <- rowMeans(apply(stat.out,2,function(x) {
+															   #out <- log(x/max(x,na.rm = T))
+															   out <- log(rank(x)/length(x))
+															   #out <- rank(x)/length(x)
+															   return(out)
+															  }))
+				names(majority.vote) <- 2:K.max
 			
-			if (save.output)
-			{
-				png("scalecluster_heatmap.png",width = 700,height = 700)
-				heatmap(as.matrix(D),Colv = "Rowv",scale = "none",col = heat.colors(50),ColSideColors = as.character(optimal.cls))
-				dev.off()
+				#X11();
+				if (save.output)
+				{
+					png("majority_vote.png",width = 600,height = 600)
+					barplot(majority.vote,xlab = "k",ylab = "mean(log(normalized rank))")
+					dev.off()
+				}
+				#X11();
+				if (save.output)
+				{
+					png("cluster_stats.png",width = 900,height = 900)
+					par(mfrow = c(2,2),mar = c(3,5,1,1))
+					for (c in 1:ncol(stat.out))
+					{
+					 if (!all(is.nan(stat.out[,c]) | is.infinite(stat.out[,c]) | is.na(stat.out[,c]))) plot(2:K.max,stat.out[,c],xlab = "k",ylab = colnames(stat.out)[c])
+					}
+					dev.off()
+				}
+				optimal.i <- max(which(majority.vote == max(majority.vote,na.rm = T)))
+				optimal.cls <- k.cls[[optimal.i]]
+				
+				if (save.output)
+				{
+					png("scalecluster_heatmap.png",width = 700,height = 700)
+					heatmap(as.matrix(D),Colv = "Rowv",scale = "none",col = heat.colors(50),ColSideColors = as.character(optimal.cls))
+					dev.off()
+				}
+			}else{
+				majority.vote <- 0
+				optimal.cls <- k.cls[[1]]
 			}
+			
 		}else{
 			majority.vote <- 0
 			optimal.cls <- k.cls[[1]]

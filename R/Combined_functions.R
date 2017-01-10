@@ -1,4 +1,5 @@
 do.MEGENA <- function(g,
+do.hubAnalysis = TRUE,
 mod.pval = 0.05,hub.pval = 0.05,remove.unsig = TRUE,
 min.size = 10,max.size = 2500,
 doPar = FALSE,num.cores = 4,n.perm = 100,singleton.size = 3,
@@ -35,7 +36,7 @@ save.output = FALSE)
 	
 	if (save.output) output.geneSet.file(sig.modules,"multiscale_significant.modules.txt")
 	
-	if (length(which(module.output$module.pvalue < mod.pval)) > 0)
+	if (length(which(module.output$module.pvalue < mod.pval)) > 0 & do.hubAnalysis)
 	{
 		###### perform hub analysis and scale clustering 
 		cat("Commence MHA...\n")

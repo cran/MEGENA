@@ -68,10 +68,10 @@ data.col = NULL,low.color = "blue",mid.color = "white",high.color = "red",mid.va
 		hierarchy.obj <- ggplot() + geom_segment(aes(x=X1, y=Y1, xend = X2, yend = Y2),data=edges,size = 0.5,
 		colour=edge.color,alpha = 0.5,arrow = arrow(length = unit(arrow.size, "npc"))) + 
 		geom_point(data=node.features,mapping = aes(x = X1,y = X2,size = node_size * node.scaleFactor),colour = node.color) + 
-		geom_text_repel(data = vert.features,aes(x = X1,y = X2,label = node.lab,size = node_size * label.scaleFactor),colour = node.label.color,alpha = 0) +
+		geom_text_repel(data = vert.features,aes(x = X1,y = X2,label = node.lab,size = node_size * label.scaleFactor),colour = node.label.color) +
 		theme_bw() + 
-		theme(panel.background = element_blank(),axis.title.x = element_blank(),axis.title.y = element_blank(),
-		panel.background = element_rect(fill = "white", colour = NA),
+		theme(axis.title.x = element_blank(),axis.title.y = element_blank(),
+		#panel.background = element_rect(fill = "white", colour = NA),
 		axis.line=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),
 		panel.grid.minor = element_blank(), panel.grid.major = element_blank(),
 		legend.position = "bottom",legend.direction = "horizontal")
@@ -80,10 +80,9 @@ data.col = NULL,low.color = "blue",mid.color = "white",high.color = "red",mid.va
 		colour=edge.color,alpha = 0.5,arrow = arrow(length = unit(arrow.size, "npc"))) + 
 		geom_point(data=node.features,mapping = aes(x = X1,y = X2,size = node_size * node.scaleFactor,colour = node_value)) + 
 		scale_colour_gradient2(low = low.color,high = high.color,mid = mid.color,midpoint = mid.value) + 
-		geom_text_repel(data = vert.features,aes(x = X1,y = X2,label = node.lab,size = node_size * label.scaleFactor),colour = node.label.color,alpha = 0) +
+		geom_text_repel(data = vert.features,aes(x = X1,y = X2,label = node.lab,size = node_size * label.scaleFactor),colour = node.label.color) +
 		theme_bw() + 
-		theme(panel.background = element_blank(),axis.title.x = element_blank(),axis.title.y = element_blank(),
-		panel.background = element_rect(fill = "white", colour = NA),
+		theme(axis.title.x = element_blank(),axis.title.y = element_blank(),
 		axis.line=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),
 		panel.grid.minor = element_blank(), panel.grid.major = element_blank(),
 		legend.position = "bottom",legend.direction = "horizontal")

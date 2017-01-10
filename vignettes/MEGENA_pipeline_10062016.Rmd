@@ -1,7 +1,7 @@
 ---
 title: "MEGENA_pipeline"
 author: "Won-Min Song"
-date: "October 25, 2016"
+date: "January 04, 2017"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{MEGENA pipeline overview}
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## MEGENA pipeline as of 10/25/2016 
 
-This is a routine MEGENA pipeline description encompassing from data correlation analysis to module plotting, and is based on version 1.3.5-2 <https://CRAN.R-project.org/package=MEGENA>.Please cite the paper below when MEGENA is applied as part of your analysis: 
+This is a routine MEGENA pipeline description encompassing from data correlation analysis to module plotting, and is based on version 1.3.6 <https://CRAN.R-project.org/package=MEGENA>.Please cite the paper below when MEGENA is applied as part of your analysis: 
 
 Song W.-M., Zhang B. (2015) Multiscale Embedded Gene Co-expression Network Analysis. PLoS Comput Biol 11(11): e1004574. doi: 10.1371/journal.pcbi.1004574.
 
@@ -116,10 +116,10 @@ print(summary.output$module.table)
 You can generate refined module network plots: 
 
 ```{r modulePlot}
-pnet.obj <- plot_module(output = summary.output,PFN = g,subset.module = "c1_3",
-	layout = "kamada.kawai",label.hubs.only = FALSE,
+pnet.obj <- plot_module(output.summary = summary.output,PFN = g,subset.module = "c1_3",
+	layout = "kamada.kawai",label.hubs.only = TRUE,
 	gene.set = NULL,color.code =  "grey",
-	output.plot = FALSE,out.dir = "modulePlot",col.names = c("magenta","green","cyan"),label.scaleFactor = 2,
+	output.plot = FALSE,out.dir = "modulePlot",col.names = c("magenta","green","cyan"),label.scaleFactor = 20,
 	hubLabel.col = "black",hubLabel.sizeProp = 1,show.topn.hubs = Inf,show.legend = TRUE)
 
 #X11();

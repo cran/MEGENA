@@ -77,10 +77,10 @@ print(head(summary.output$modules,2))
 print(summary.output$module.table)
 
 ## ----modulePlot----------------------------------------------------------
-pnet.obj <- plot_module(output = summary.output,PFN = g,subset.module = "c1_3",
-	layout = "kamada.kawai",label.hubs.only = FALSE,
+pnet.obj <- plot_module(output.summary = summary.output,PFN = g,subset.module = "c1_3",
+	layout = "kamada.kawai",label.hubs.only = TRUE,
 	gene.set = NULL,color.code =  "grey",
-	output.plot = FALSE,out.dir = "modulePlot",col.names = c("magenta","green","cyan"),label.scaleFactor = 2,
+	output.plot = FALSE,out.dir = "modulePlot",col.names = c("magenta","green","cyan"),label.scaleFactor = 20,
 	hubLabel.col = "black",hubLabel.sizeProp = 1,show.topn.hubs = Inf,show.legend = TRUE)
 
 #X11();

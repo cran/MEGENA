@@ -11,7 +11,7 @@ Extract subnetworks for modules and plot.
 plot_module(output.summary,PFN,subset.module = NULL,col.names,
 gene.set = NULL,color.code = "logFC",show.legend = TRUE,
 label.hubs.only = TRUE,hubLabel.col = "red",hubLabel.sizeProp = 0.5,show.topn.hubs = 10,
-node.sizeProp = 13,label.sizeProp = 13,label.scaleFactor = 10,
+node.sizeProp = 13,label.sizeProp = 13,label.scaleFactor = 10,label.alpha = 0.5,
 layout = "kamada.kawai",output.plot = TRUE,out.dir = "modulePlot")
 }
 \arguments{
@@ -29,6 +29,7 @@ layout = "kamada.kawai",output.plot = TRUE,out.dir = "modulePlot")
   \item{node.sizeProp}{A multiplicative factor to adjust node sizes with respect to 90th percentile degree node size. Default is 13}
   \item{label.sizeProp}{A multiplicative factor to adjust node label sizes with respect to 90th percentile degree node size. Default is 13}
   \item{label.scaleFactor}{Overall scale factor to control the final size of node labels appearing in figure. Default is 10.}
+  \item{label.alpha}{Transparency value ranging from 0 (transparent) to 1 (solid). Default is 0.5.}
   \item{layout}{Network layout algorithm to apply. Options are: "kamada.kawai", "fruchterman.reingold".}
   \item{output.plot}{logical value. output.plot = TRUE generates figure files under folder, "modulePlot".}
   \item{out.dir}{if output.plot = TRUE, then out.dir is created and resulting figures are exported to .png files to the folder.}

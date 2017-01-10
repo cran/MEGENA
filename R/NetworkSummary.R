@@ -165,7 +165,7 @@ get.nodeTopoInfo <- function(PFN,modules,KD,label.pttrn = NULL,outputfname = NUL
 	moduleMatrix <- do.call(cbind,lapply(modules,function(x,y) {y %in% x},y = V(PFN)$name));
 	
 	mod.mat <- matrix("",ncol = ncol(moduleMatrix),nrow = nrow(moduleMatrix));mod.mat[which(moduleMatrix)] <- "YES";colnames(mod.mat) <- names(modules)
-	write.table(data.frame(probe = V(PFN)$name,as.data.frame(mod.mat)),file = "moduleMembership.txt",sep = "\t",row.names = F,col.names = T,quote = F)
+	#write.table(data.frame(probe = V(PFN)$name,as.data.frame(mod.mat)),file = "moduleMembership.txt",sep = "\t",row.names = F,col.names = T,quote = F)
 	
 	rownames(moduleMatrix) <- V(PFN)$name;
 	module.vector <- apply(moduleMatrix,1,function(x,y) paste(y[x],collapse = ","),y = colnames(moduleMatrix))

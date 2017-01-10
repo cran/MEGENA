@@ -9,6 +9,7 @@ multiscale clustering analysis (MCA) and multiscale hub analysis (MHA) pipeline
 }
 \usage{
 do.MEGENA(g,
+do.hubAnalysis = TRUE,
 mod.pval = 0.05,hub.pval = 0.05,remove.unsig = TRUE,
 min.size = 10,max.size = 2500,
 doPar = FALSE,num.cores = 4,n.perm = 100,singleton.size = 3,
@@ -17,6 +18,7 @@ save.output = FALSE)
 
 \arguments{
   \item{g}{igraph object of PFN.}
+  \item{do.hubAnalysis}{TRUE/FALSE indicating to perform multiscale hub analysis (MHA) in downstream. Default is TRUE.}
   \item{mod.pval}{cluster significance p-value threshold w.r.t random planar networks}
   \item{hub.pval}{hub significance p-value threshold w.r.t random planar networks}
 \item{remove.unsig}{TRUE/FALSE indicating to remove insignificant clusters in MHA.}

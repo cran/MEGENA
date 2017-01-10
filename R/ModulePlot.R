@@ -18,7 +18,7 @@ globalVariables(names = c("X1","X2","Y1","Y2","id","n.cores","node.lab","node.st
 plot_module <- function(output.summary,PFN,subset.module = NULL,col.names,
 gene.set = NULL,color.code = "logFC",show.legend = TRUE,
 label.hubs.only = TRUE,hubLabel.col = "red",hubLabel.sizeProp = 0.5,show.topn.hubs = 10,
-node.sizeProp = 13,label.sizeProp = 13,label.scaleFactor = 10,
+node.sizeProp = 13,label.sizeProp = 13,label.scaleFactor = 10,label.alpha = 0.5,
 layout = "kamada.kawai",output.plot = TRUE,out.dir = "modulePlot")
 {
 	# get matched lists of modules and hubs
@@ -144,7 +144,6 @@ layout = "kamada.kawai",output.plot = TRUE,out.dir = "modulePlot")
 			labs(title = subset.module[i]) + 
 			theme_bw() + 
 			theme(panel.background = element_blank(),axis.title.x = element_blank(),axis.title.y = element_blank(),
-						panel.background = element_rect(fill = "white", colour = NA),
 						axis.line=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),
 						panel.grid.minor = element_blank(), panel.grid.major = element_blank(),plot.title = element_text(size = title.size),
 						legend.position = "bottom",legend.direction = "horizontal") +
@@ -158,7 +157,6 @@ layout = "kamada.kawai",output.plot = TRUE,out.dir = "modulePlot")
 			labs(title = subset.module[i]) + 
 			theme_bw() + 
 			theme(panel.background = element_blank(),axis.title.x = element_blank(),axis.title.y = element_blank(),
-						panel.background = element_rect(fill = "white", colour = NA),
 						axis.line=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),
 						panel.grid.minor = element_blank(), panel.grid.major = element_blank(),plot.title = element_text(size = title.size),
 						legend.position = "bottom",legend.direction = "horizontal") +
@@ -170,12 +168,12 @@ layout = "kamada.kawai",output.plot = TRUE,out.dir = "modulePlot")
 		if (label.hubs.only & length(hub) > 0)
 		{
 			pnet[[i]] <- pnet[[i]] + geom_text_repel(data = subset(node.features,id %in% hub),
-			   aes(x = X1,y = X2,label = node.lab,size = node.size * hubLabel.sizeProp * label.scaleFactor),colour = hubLabel.col,alpha = 0)
+			   aes(x = X1,y = X2,label = node.lab,size = node.size * hubLabel.sizeProp * label.scaleFactor),colour = hubLabel.col,alpha = label.alpha)
 		}else{
 			vert.features = node.features;
 			vert.features$node.size = vert.features$node.size * label.sizeProp;
 			pnet[[i]] <- pnet[[i]] + geom_text_repel(data = vert.features,
-			   aes(x = X1,y = X2,label = node.lab,size = node.size * label.scaleFactor),colour = "black",alpha = 0)
+			   aes(x = X1,y = X2,label = node.lab,size = node.size * label.scaleFactor),colour = "black",alpha = label.alpha)
 		}
 		rm(edges,node.features,hub,module)
 		
@@ -312,7 +310,6 @@ node.sizeProp = 13,label.sizeProp = 13,label.scaleFactor = 10,layout = "kamada.k
 		#labs(title = subset.module[i]) + 
 		theme_bw() + 
 		theme(panel.background = element_blank(),axis.title.x = element_blank(),axis.title.y = element_blank(),
-			panel.background = element_rect(fill = "white", colour = NA),
 			axis.line=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),
 			panel.grid.minor = element_blank(), panel.grid.major = element_blank(),plot.title = element_text(size = title.size),
 			legend.position = "bottom",legend.direction = "horizontal") +
@@ -325,7 +322,6 @@ node.sizeProp = 13,label.sizeProp = 13,label.scaleFactor = 10,layout = "kamada.k
 			#labs(title = subset.module[i]) + 
 			theme_bw() + 
 			theme(panel.background = element_blank(),axis.title.x = element_blank(),axis.title.y = element_blank(),
-						panel.background = element_rect(fill = "white", colour = NA),
 						axis.line=element_blank(), axis.ticks=element_blank(), axis.text = element_blank(),
 						panel.grid.minor = element_blank(), panel.grid.major = element_blank(),plot.title = element_text(size = title.size),
 						legend.position = "bottom",legend.direction = "horizontal") +
@@ -337,12 +333,12 @@ node.sizeProp = 13,label.sizeProp = 13,label.scaleFactor = 10,layout = "kamada.k
 	if (label.hubs.only & length(hub) > 0)
 	{
 		pnet <- pnet + geom_text_repel(data = subset(node.features,id %in% hub),
-		   aes(x = X1,y = X2,label = node.lab,size = node.size * hubLabel.sizeProp * label.scaleFactor),colour = hubLabel.col,alpha = 0)
+		   aes(x = X1,y = X2,label = node.lab,size = node.size * hubLabel.sizeProp * label.scaleFactor),colour = hubLabel.col)
 	}else{
 		vert.features = node.features;
 		vert.features$node.size = vert.features$node.size * label.sizeProp;
 		pnet <- pnet + geom_text_repel(data = vert.features,
-		   aes(x = X1,y = X2,label = node.lab,size = node.size * label.scaleFactor),colour = "black",alpha = 0)
+		   aes(x = X1,y = X2,label = node.lab,size = node.size * label.scaleFactor),colour = "black")
 	}
 	rm(edges,hub,module)
 	
