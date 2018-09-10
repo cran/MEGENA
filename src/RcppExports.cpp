@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // planaritytest
 SEXP planaritytest(SEXP N, SEXP rows, SEXP cols);
-RcppExport SEXP MEGENA_planaritytest(SEXP NSEXP, SEXP rowsSEXP, SEXP colsSEXP) {
+RcppExport SEXP _MEGENA_planaritytest(SEXP NSEXP, SEXP rowsSEXP, SEXP colsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -17,4 +17,14 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(planaritytest(N, rows, cols));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_MEGENA_planaritytest", (DL_FUNC) &_MEGENA_planaritytest, 3},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_MEGENA(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

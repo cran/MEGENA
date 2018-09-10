@@ -28,7 +28,8 @@ ijw <- calculate.correlation(datExpr,doPerm = cor.perm,output.corTable = FALSE,o
 
 ## ----PFN-----------------------------------------------------------------
 #### register multiple cores if needed: note that set.parallel.backend() is deprecated. 
-if (doPar & getDoParWorkers() == 1)
+run.par = doPar & (getDoParWorkers() == 1) 
+if (run.par)
 {
   cl <- parallel::makeCluster(n.cores)
   registerDoParallel(cl)

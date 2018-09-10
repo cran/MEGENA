@@ -21,25 +21,31 @@ output.sig = TRUE)
 	hub.output = MEGENA.output$hub.output
 
 	# extract hubs
-	if (is.null(annot.table))
+	run.hub = all(!is.null(MEGENA.output$hub.output)) & all(!is.na(MEGENA.output$hub.output))
+	if (run.hub)
 	{
-	 hub.summary <- sapply(hub.output$module.degreeStat,function(x,pval) {
-																 tbl <- x[which(x$pvalue < hub.pvalue),];
-																 tbl <- tbl[order(tbl$degree,decreasing = T),];
-																 paste(paste(as.character(tbl$gene),"(",as.character(tbl$degree),")",sep = ""),collapse = ",")
-																},pval = hub.pvalue)
+		if (is.null(annot.table))
+		{
+			hub.summary <- sapply(hub.output$module.degreeStat,function(x,pval) {
+														 tbl <- x[which(x$pvalue < hub.pvalue),];
+														 tbl <- tbl[order(tbl$degree,decreasing = T),];
+														 paste(paste(as.character(tbl$gene),"(",as.character(tbl$degree),")",sep = ""),collapse = ",")
+														},pval = hub.pvalue)
+		}else{
+		 gene.vec <- as.character(annot.table[[symbol.col]]);
+		 names(gene.vec) <- as.character(annot.table[[id.col]])
+		 hub.summary <- sapply(hub.output$module.degreeStat,function(x,pval,gene.vec) {
+																	 tbl <- x[which(x$pvalue < hub.pvalue),];
+																	 tbl <- tbl[order(tbl$degree,decreasing = T),];
+																	 matched.symbol <- gene.vec[match(as.character(tbl$gene),names(gene.vec))]
+																	 tbl$gene <- paste(matched.symbol,as.character(tbl$gene),sep = "|")
+																	 paste(paste(as.character(tbl$gene),"(",as.character(tbl$degree),")",sep = ""),collapse = ",")
+																	},pval = hub.pvalue,gene.vec = gene.vec)
+		}
 	}else{
-	 gene.vec <- as.character(annot.table[[symbol.col]]);
-	 names(gene.vec) <- as.character(annot.table[[id.col]])
-	 hub.summary <- sapply(hub.output$module.degreeStat,function(x,pval,gene.vec) {
-																 tbl <- x[which(x$pvalue < hub.pvalue),];
-																 tbl <- tbl[order(tbl$degree,decreasing = T),];
-																 matched.symbol <- gene.vec[match(as.character(tbl$gene),names(gene.vec))]
-																 tbl$gene <- paste(matched.symbol,as.character(tbl$gene),sep = "|")
-																 paste(paste(as.character(tbl$gene),"(",as.character(tbl$degree),")",sep = ""),collapse = ",")
-																},pval = hub.pvalue,gene.vec = gene.vec)
+		hub.summary <- rep(NA,length(module.output$modules));names(hub.summary) <- names(module.output$modules)
 	}
-
+	
 	# module pvalue
 	module.pvalue <- module.output$module.pvalue;names(module.pvalue) <- names(module.output$modules)
 
@@ -50,19 +56,26 @@ output.sig = TRUE)
 	module.parent <- rep(NA,length(module.output$modules))
 	names(module.parent) <- names(module.output$modules)
 	module.parent[names(module.output$modules)[module.output$module.relation[,2]]] <- names(module.output$modules)[module.output$module.relation[,1]]
-
-	# module by scale-groups
-	module.scaleGroup <- lapply(hub.output$scale.summary.clusters,names)
-	scale.group <- rep(NA,length(module.output$modules))
-	names(scale.group) <- names(module.output$modules)
-	for (i in 1:length(module.scaleGroup))
+	if (!is.null(hub.output))
 	{
-	 scale.group[module.scaleGroup[[i]]] <- names(module.scaleGroup)[i]
-	}
+		# module by scale-groups
+		module.scaleGroup <- lapply(hub.output$scale.summary.clusters,names)
+		scale.group <- rep(NA,length(module.output$modules))
+		names(scale.group) <- names(module.output$modules)
+		for (i in 1:length(module.scaleGroup))
+		{
+		 scale.group[module.scaleGroup[[i]]] <- names(module.scaleGroup)[i]
+		}
 
-	module.id <- names(module.output$modules)
-	module.table <- data.frame(module.id = module.id,module.size = module.size[module.id],module.parent = module.parent[module.id],
-	module.hub = hub.summary[module.id],module.scale = scale.group[module.id],module.pvalue = module.pvalue[module.id])
+		module.id <- names(module.output$modules)
+		module.table <- data.frame(module.id = module.id,module.size = module.size[module.id],module.parent = module.parent[module.id],
+		module.hub = hub.summary[module.id],module.scale = scale.group[module.id],module.pvalue = module.pvalue[module.id])
+	}else{
+		module.id <- names(module.output$modules)
+		module.table <- data.frame(module.id = module.id,module.size = module.size[module.id],module.parent = module.parent[module.id],
+		module.hub = hub.summary[module.id],module.scale = rep(NA,length(module.id)),module.pvalue = module.pvalue[module.id])
+	}
+	
 
 	if (output.sig)
 	{

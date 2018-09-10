@@ -230,7 +230,7 @@ iplanarityTesting <- function(epair,rows,cols,N)
   return(edgel);
 }
 
-calculate.PFN <- function (edgelist, max.skipEdges = NULL,doPar = FALSE, num.cores = NULL, keep.track = TRUE)
+calculate.PFN <- function (edgelist, max.skipEdges = NULL,maxENum = NULL,doPar = FALSE, num.cores = NULL, keep.track = TRUE)
 {
 	if (is.null(num.cores)) num.cores = 1
     if (is.unsorted(rev(edgelist[[3]]))) edgelist <- edgelist[order(edgelist[[3]], decreasing = T),]
@@ -242,13 +242,14 @@ calculate.PFN <- function (edgelist, max.skipEdges = NULL,doPar = FALSE, num.cor
         vertex.names), edgelist[[3]])
     rm(edgelist)
     N <- length(vertex.names)
+	
+	if (is.null(maxENum)) maxENum = 3 * (N - 2)
     cat("####### PFN Calculation commences ########\n")
     if (!doPar) {
-        PFN <- serial.PFN(sortedEdge = ijw, Ng = N, maxENum = 3 *
-            (N - 2))
+        PFN <- serial.PFN(sortedEdge = ijw, Ng = N, maxENum = maxENum)
     }
     else {
-        PFN <- compute.PFN.par(sortedEdge = ijw, Ng = N, maxENum = 3 * (N - 2), 
+        PFN <- compute.PFN.par(sortedEdge = ijw, Ng = N, maxENum = maxENum, 
 		Njob = 1000, Ncore = num.cores, max.skipEdges = max.skipEdges,
             keep.track = keep.track)
     }

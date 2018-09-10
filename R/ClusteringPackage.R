@@ -212,14 +212,15 @@ iterative.boundaryUpdate <- function(g,modules,S,max.iter = 10)
  
  do.update <- TRUE
  n.iter <- 0;
- while (do.update & (n.iter < max.iter))
+ while (do.update)
  {
   new.memMatrix <- evaluate.boundary(adj,memMatrix,S)
   comp.mat <- Matrix::t(memMatrix) %*% new.memMatrix;
-  diag(comp.mat) <- rep(0,ncol(comp.mat));
-  if (all(comp.mat == 0)) do.update = FALSE
+  
+  if (all((Matrix::diag(comp.mat) - Matrix::colSums(memMatrix)) == 0)) do.update = FALSE
   memMatrix <- new.memMatrix;
   n.iter <- n.iter + 1;
+  if (n.iter < max.iter) do.update = FALSE
  }
  
  out <- apply(memMatrix,2,function(x,y) y[which(x != 0)],y = rownames(memMatrix))
@@ -345,7 +346,8 @@ random.T1 <- function(el,surf.tri,n1)
 
 match.connected <- function(el,ne)
 {
- if (ne > 2 & (el > ne))
+ do.test = ne > 2 & (nrow(el) > ne)
+ if (do.test)
  {
 	 dn <- nrow(el) - ne;
 	 nt <- 0
@@ -480,7 +482,7 @@ get.random.D <- function(nv,w,d.func,name.vec)
  #T2.output <- get.randomPlanar(nv,n1 = NULL,ne = length(w))
  el <- cbind(T2.output[[1]],sample(w,nrow(T2.output[[1]]),replace = T));colnames(el) <- c("row","col","weight")
  g.rand <- graph.data.frame(as.data.frame(el),directed = F);
- V(g.rand)$name <- name.vec
+ #V(g.rand)$name <- name.vec
  D.rand <- get.network.metric(g.rand,d.func);
  return(D.rand)
 }
@@ -644,14 +646,17 @@ d.func = function(x) {1-x},n.singleton = 3,alpha.range = seq(0.01,10,0.01))
 	
     for (j in 1:length(comp.rel))
     {
-     if (any(comp.rel[[j]] < 1))
+	 if (length(comp.rel[[j]]) > 0)
 	 {
-	  alpha.i <- max(which(comp.rel[[j]] < 1))
-	  def.alpha[j] <- min(c(alpha.range[alpha.i],alpha.defined[test.i[i]]))
-	  stat.out <- evaluate.significance(score.o = comp.rel[[j]][alpha.i],nv = length(pam.out[[j]]),D.rand = D.rand,alpha = alph[alpha.i],n.perm = n.perm)
-	  if (sig.method == "pval.perm") {pval = stat.out$pval}else{pval = stat.out$pval.norm}
-	  comp.sig[j] <- pval
-	  comp.sc[j] <- comp.rel[[j]][alpha.i]
+		 if (any(comp.rel[[j]] < 1))
+		 {
+		  alpha.i <- max(which(comp.rel[[j]] < 1))
+		  def.alpha[j] <- min(c(alpha.range[alpha.i],alpha.defined[test.i[i]]))
+		  stat.out <- evaluate.significance(score.o = comp.rel[[j]][alpha.i],nv = length(pam.out[[j]]),D.rand = D.rand,alpha = alph[alpha.i],n.perm = n.perm)
+		  if (sig.method == "pval.perm") {pval = stat.out$pval}else{pval = stat.out$pval.norm}
+		  comp.sig[j] <- pval
+		  comp.sc[j] <- comp.rel[[j]][alpha.i]
+		 }
 	 }
     }
 	
@@ -845,7 +850,10 @@ cluster.scales <- function(connect.matrix,K.max = NULL,save.output = FALSE)
 {
     #if (is.null(K.max)) K.max = ncol(connect.matrix)-1;
 	
-	if (is.matrix(connect.matrix) & is.null(K.max)) K.max <- min(c((ncol(connect.matrix)-1),K.max))
+	restrict.kmax = is.matrix(connect.matrix) & is.null(K.max)
+	if (restrict.kmax) K.max <- min(c((ncol(connect.matrix)-1),K.max))
+	
+	if (K.max > 20) K.max = 20; # restrict cluster scales to be 20 at max.
 	
 	vec <- rep(1,ncol(connect.matrix));names(vec) <- colnames(connect.matrix)
 	output <- list(clusters = vec);

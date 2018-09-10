@@ -5,7 +5,7 @@
 Boyer-Myvold Planarity test of a network
 }
 \description{
-imports from Boost graph library, and test planarity of a network
+wrapper function of _MEGENA_planaritytest. imports from Boost graph library, and test planarity of a network
 }
 \usage{
 planaritytest(N, rows, cols)

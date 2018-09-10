@@ -8,7 +8,7 @@ PFN calculation
 main function to calculate PFN a ranked list of edge pairs
 }
 \usage{
-calculate.PFN(edgelist,max.skipEdges = NULL,doPar = FALSE,
+calculate.PFN(edgelist,max.skipEdges = NULL,maxENum = NULL,doPar = FALSE,
 num.cores = NULL,keep.track = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -17,6 +17,8 @@ num.cores = NULL,keep.track = TRUE)
   \item{max.skipEdges}{Maximum number of edges to be searched by planarity test without any inclusion to PFN. 
   If set NULL, it will be automatically set to number of cores x 1000. 
   It acts as a threhold to quicken PFN construction termination during PCP.}
+  \item{maxENum}{maximum number of edges to include in final PFN. Default value is NULL, 
+  which invokes maximal number of edges allowed in planar network.}
   \item{doPar}{TRUE/FALSE logical variable to choose parallelization.}
   \item{num.cores}{number of cores to use in parallelization.}
   \item{keep.track}{If TRUE, pfg_el.RData will be created in working folder. This file can be used later for restart in case PFN construction did not finish successfully.

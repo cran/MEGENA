@@ -1,3 +1,46 @@
+module_convert_to_table <- function(MEGENA.output,mod.pval = 0.05,hub.pval = 0.05,min.size = 10,max.size)
+{ 	
+	summary.output <- MEGENA.ModuleSummary(MEGENA.output,mod.pvalue = mod.pval,hub.pvalue = hub.pval,
+	min.size = min.size,max.size = max.size,annot.table = NULL,symbol.col = NULL,id.col = NULL,
+	output.sig = TRUE)
+
+	modules <- summary.output$modules
+	#####
+	is.annted <- any(sapply(modules,function(x) length(grep("\\|",x)) > 0))
+	df <- mapply(FUN = function(x,y) data.frame(id = x,module = rep(y,length(x))),x = modules,y = as.list(names(modules)),SIMPLIFY = FALSE)
+	df <- do.call('rbind.data.frame',df)
+	if (is.annted)
+	{
+		df <- data.frame(id = df[[1]],gene.symbol = gsub("\\|(.*)","",as.character(df[[1]])),gene.symbol2 = gsub("^(.*)\\|","",as.character(df[[1]])),
+		module = df[[2]])
+	}
+	
+	# update module parent relationship
+	if (!is.null(summary.output$module.table))
+	{
+		modtbl <- summary.output$module.table
+		df <- cbind.data.frame(df[,-ncol(df)],module.parent = modtbl$module.parent[match(df$module,modtbl$module.id)],module = df[[ncol(df)]])
+		rm(modtbl)
+		colnames(df)[1] <- "id"
+	}
+	
+	# update node statistics
+	if (!is.null(MEGENA.output$node.summary))
+	{
+		colnames(df)[1] <- "id"
+		# get hub summary
+		hubs <- lapply(MEGENA.output$hub.output$module.degreeStat,function(x,hp) as.character(x[[1]])[which(x$pvalue < hp)],hp = hub.pval)
+		hvec <- rep(NA,nrow(df))
+		for (j in 1:length(hubs)) hvec[which(df[[1]] %in% hubs[[j]] & df$module == names(hubs)[j])] <- "hub"
+		df <- cbind.data.frame(df[,-ncol(df)],node.degree = MEGENA.output$node.summary$node.degree[match(df$id,MEGENA.output$node.summary$id)],
+		node.strength = MEGENA.output$node.summary$node.strength[match(df$id,MEGENA.output$node.summary$id)],is.hub = hvec,
+		module = df[[ncol(df)]]);
+		rm(MEGENA.output,summary.output)
+	}
+	rownames(df) <- NULL
+	return(df)
+}
+
 
 module_rank=function(X){
 #input:
